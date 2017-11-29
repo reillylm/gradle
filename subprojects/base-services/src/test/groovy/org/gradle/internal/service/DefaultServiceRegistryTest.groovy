@@ -50,7 +50,6 @@ class DefaultServiceRegistryTest extends Specification {
         result == value
 
         and:
-        _ * parent.hasService(BigDecimal) >> true
         1 * parent.get(BigDecimal) >> value
     }
 
@@ -68,7 +67,6 @@ class DefaultServiceRegistryTest extends Specification {
 
         and:
         1 * parent1.get(BigDecimal) >> { throw new UnknownServiceException(BigDecimal, "fail") }
-        _ * parent2.hasService(BigDecimal) >> true
         1 * parent2.get(BigDecimal) >> value
     }
 
@@ -216,7 +214,6 @@ class DefaultServiceRegistryTest extends Specification {
         result == '123'
 
         and:
-        _ * parent.hasService(Number) >> true
         1 * parent.get(Number) >> 123
     }
 
@@ -441,7 +438,7 @@ class DefaultServiceRegistryTest extends Specification {
         then:
         ServiceCreationException e = thrown()
         e.message == "Cannot create service of type Integer using ProviderWithCycle.createInteger() as there is a problem with parameter #1 of type String."
-        e.cause.message == 'Cycle in dependencies of service of type String.'
+        e.cause.message == 'A service dependency cycle was detected: Integer > String > String.'
 
         when:
         registry.getAll(Number)
@@ -449,7 +446,7 @@ class DefaultServiceRegistryTest extends Specification {
         then:
         e = thrown()
         e.message == "Cannot create service of type Integer using ProviderWithCycle.createInteger() as there is a problem with parameter #1 of type String."
-        e.cause.message == 'Cycle in dependencies of service of type String.'
+        e.cause.message == 'A service dependency cycle was detected: Integer > String > String.'
     }
 
     def failsWhenAProviderFactoryMethodReturnsNull() {
@@ -725,8 +722,6 @@ class DefaultServiceRegistryTest extends Specification {
         });
 
         given:
-        _ * parent1.hasService(Number) >> true
-        _ * parent2.hasService(Number) >> true
         _ * parent1.getAll(Number) >> [123L]
         _ * parent2.getAll(Number) >> [456]
 
